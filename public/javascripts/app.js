@@ -169,7 +169,7 @@
     var fillBoard = function (board) {
       numTries++;
       displayBoard(board, '#socket');
-      document.querySelector('h2#attempts').textContent = 'My Attempt No. ' + numTries;
+      document.querySelector('h2#attempts').textContent = 'Pass No. ' + numTries;
       tmpBoard = board.slice();
       rows = tmpBoard.toRows();
       cols = rows.toColumns();
@@ -193,6 +193,7 @@
         snapshots.push(tmpBoard.slice());
         console.log('making snapshot', tmpBoard);
         // get our next easiest
+        // calculate the quad with the most filled in, and start there
         var nextEasiest = [];
         quads.forEach(function (quad, i) {
           nextEasiest.push({idx: i, val: getQuadContent(quadMap[i][0]).diff()});
@@ -238,7 +239,6 @@
       } else {
         document.querySelector('#hurray').style.display = 'none';
         document.querySelector('#boo-hiss').style.display = 'none';
-        displayBoard(solved, '#answer');
         displayBoard(tmpBoard, '#socket');
         if (numTries >= 1000) {
           document.querySelector('#boo-hiss').style.display = 'block';
@@ -248,6 +248,10 @@
       }
     };
 
+    // display our boards
+    displayBoard(tmpBoard, '#original');
+    displayBoard(tmpBoard, '#socket');
+    displayBoard(solved, '#answer');
     // kick it off.
     return fillBoard(tmpBoard);
   } // end solveSodoku
