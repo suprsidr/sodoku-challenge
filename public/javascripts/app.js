@@ -81,11 +81,9 @@
     var cols = [];
     var quads = [];
     var quadMap = [];
-    var tmpBoard = [];
+    var tmpBoard = board.slice();
     var numTries = 0;
-    var snapshots = [];
-    snapshots.push(board.slice());
-    tmpBoard = board.slice();
+    var snapshots = [board.slice()];
 
     var getQuads = function (rows) {
       if (rows.length === 0) {
