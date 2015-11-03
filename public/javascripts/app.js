@@ -2,13 +2,36 @@
  * Created by suprsidr on 10/31/2015.
  */
 (function () {
-  'use strict'
+  'use strict';
   Array.prototype.concatAll = function () {
     var results = [];
     this.forEach(function (subArray) {
       results.push.apply(results, subArray);
     });
     return results;
+  };
+  Array.prototype.diff = function() {
+    var context = this;
+    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
+      return context.indexOf(item) === -1;
+    });
+  };
+  Array.prototype.intersect = function() {
+    // convert arguments to array
+    var args = [this];
+    for (var i = 0; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+    // args[0] needs to have greatest length
+    args.sort(function (a, b) {
+      return b.length - a.length;
+    });
+    // get intersection
+    return args[0].filter(function (item) {
+      return args.every(function (arg) {
+        return arg.indexOf(item) > -1
+      })
+    });
   };
 
   var board = [
@@ -34,46 +57,17 @@
     9, 8, 1, 3, 4, 5, 2, 7, 6,
     3, 7, 4, 9, 6, 2, 8, 1, 5
   ];
-  var numTries = 0;
-  var snapshots = [];
-  snapshots.push(board.slice());
-  document.querySelector('#hurray').style.display = 'none';
-  document.querySelector('#boo-hiss').style.display = 'none';
+
   function solveSodoku(board) {
-    numTries++;
-    //if (numTries >= 500) return 'sorry, too many tries';
     var rows = [];
     var cols = [];
     var quads = [];
     var quadMap = [];
     var tmpBoard = [];
-    document.querySelector('h2#attempts').textContent = 'My Attempt No. ' + numTries;
-    //console.log(numTries);
+    var numTries = 0;
+    var snapshots = [];
+    snapshots.push(board.slice());
     tmpBoard = board.slice();
-
-    var getDiff = function (arr) {
-      return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
-        return arr.indexOf(item) === -1 && item !== 0;
-      });
-    };
-
-    var getIntersect = function () {
-      // convert arguments to array
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      // args[0] needs to have greatest length
-      args.sort(function (a, b) {
-        return b.length - a.length;
-      });
-      // get intersection
-      return args[0].filter(function (item) {
-        return args.every(function (arg) {
-          return arg.indexOf(item) > -1
-        })
-      });
-    };
 
     // columns and quads are dependent on rows
     var getRows = function (board) {
@@ -138,11 +132,10 @@
       if (rows[r][c] !== 0) {
         return [];
       }
-      return getIntersect(
-        getDiff(rows[r]),
-        getDiff(cols[c]),
-        getDiff(getQuadContent(r + ":" + c))
-      )
+      return rows[r].diff().intersect(
+        cols[c].diff(),
+        getQuadContent(r + ":" + c).diff()
+      );
     };
 
     var getPlays = function () {
@@ -158,7 +151,6 @@
     // used to see if we've solved
     var compareArrays = function (a, b) {
       return a.every(function (item, idx) {
-        //console.log(item, b[idx]);
         return item === b[idx];
       });
     };
@@ -180,7 +172,10 @@
     };
 
     var fillBoard = function (board) {
+      numTries++;
       displayBoard(board, '#socket');
+      document.querySelector('h2#attempts').textContent = 'My Attempt No. ' + numTries;
+      tmpBoard = board.slice();
       rows = getRows(board);
       cols = getCols(rows);
       quads = getQuads(rows);
@@ -205,7 +200,7 @@
         // get our next easiest
         var nextEasiest = [];
         quads.forEach(function (quad, i) {
-          nextEasiest.push({idx: i, val: getDiff(getQuadContent(quadMap[i][0]))});
+          nextEasiest.push({idx: i, val: getQuadContent(quadMap[i][0]).diff()});
         });
         nextEasiest.sort(function (a, b) {
           return a.val.length - b.val.length;
@@ -237,29 +232,30 @@
           // how do we determine where we went wrong? how far back do I rollback to?
           // total reset.
           console.log('rolling back to: ', snapshots[0]);
-          return solveSodoku(snapshots[0]);
+          fillBoard(snapshots[0]);
         }
+      }
+
+      if (compareArrays(tmpBoard, solved)) {
+        displayBoard(tmpBoard, '#socket');
+        document.querySelector('#hurray').style.display = 'block';
+        return 'Hurray!';
+      } else {
+        document.querySelector('#hurray').style.display = 'none';
+        document.querySelector('#boo-hiss').style.display = 'none';
+        displayBoard(solved, '#answer');
+        displayBoard(tmpBoard, '#socket');
+        if (numTries >= 1000) {
+          document.querySelector('#boo-hiss').style.display = 'block';
+          return 'Sorry, too many tries!';
+        }
+        return fillBoard(tmpBoard);
       }
     };
 
-    displayBoard(solved, '#answer');
-    displayBoard(tmpBoard, '#socket');
-    fillBoard(tmpBoard);
-
-    if (compareArrays(tmpBoard, solved)) {
-      displayBoard(tmpBoard, '#socket');
-      document.querySelector('#hurray').style.display = 'block';
-      return 'Hurray!';
-    } else {
-      displayBoard(tmpBoard, '#socket');
-      if (numTries >= 1000) {
-        document.querySelector('#boo-hiss').style.display = 'block';
-        return 'Sorry, too many tries!';
-      }
-      return solveSodoku(tmpBoard);
-    }
-
-  }
+    // kick it off.
+    return fillBoard(tmpBoard);
+  } // end solveSodoku
 
   console.log(solveSodoku(board));
 }());
