@@ -169,7 +169,7 @@
     var fillBoard = function (board) {
       numTries++;
       displayBoard(board, '#socket');
-      document.querySelector('h2#attempts').textContent = 'Pass No. ' + numTries;
+      document.querySelector('h2#attempts').textContent = 'No. of Passes to Solve: ' + numTries;
       tmpBoard = board.slice();
       rows = tmpBoard.toRows();
       cols = rows.toColumns();
