@@ -33,6 +33,24 @@
       })
     });
   };
+  Array.prototype.toRows = function() {
+    var idx = 0, rows = [], len = this.length;
+    for (var i = 0; i < len; i += 9) {
+      rows[idx] = this.slice(i, i + 9);
+      idx++;
+    }
+    return rows;
+  };
+  Array.prototype.toColumns = function() {
+    var cols = [];
+    for (var i = 0; i < 9; i++) {
+      cols[i] = [];
+      for (var j = 0; j < 9; j++) {
+        cols[i].push(this[j][i]);
+      }
+    }
+    return cols;
+  };
 
   var board = [
     8, 0, 0, 4, 0, 6, 0, 0, 7,
@@ -69,32 +87,9 @@
     snapshots.push(board.slice());
     tmpBoard = board.slice();
 
-    // columns and quads are dependent on rows
-    var getRows = function (board) {
-      var idx = 0, rows = [], len = board.length;
-      for (var i = 0; i < len; i += 9) {
-        rows[idx] = board.slice(i, i + 9);
-        idx++;
-      }
-      return rows;
-    };
-
-    var getCols = function (rows) {
-      if (rows.length === 0) {
-        rows = getRows(tmpBoard);
-      }
-      for (var i = 0; i < 9; i++) {
-        cols[i] = [];
-        for (var j = 0; j < 9; j++) {
-          cols[i].push(rows[j][i]);
-        }
-      }
-      return cols;
-    };
-
     var getQuads = function (rows) {
       if (rows.length === 0) {
-        rows = getRows(tmpBoard);
+        rows = tmpBoard.toRows();
       }
       var idx = 0;
       for (var outer = 0; outer < 9; outer += 3) {
@@ -157,7 +152,7 @@
 
     // simply for display on the page
     var displayBoard = function (board, el) {
-      var rows = getRows(board);
+      var rows = board.toRows();
       var socket = document.querySelector(el);
       socket.innerHTML = '';
       rows.forEach(function (row) {
@@ -176,8 +171,8 @@
       displayBoard(board, '#socket');
       document.querySelector('h2#attempts').textContent = 'My Attempt No. ' + numTries;
       tmpBoard = board.slice();
-      rows = getRows(board);
-      cols = getCols(rows);
+      rows = tmpBoard.toRows();
+      cols = rows.toColumns();
       quads = getQuads(rows);
 
       var plays = getPlays();
