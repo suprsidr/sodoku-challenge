@@ -226,7 +226,7 @@
             return;
           }
           // how do we determine where we went wrong? how far back do I rollback to?
-          // total reset.
+          // total reset. Need to refactor
           console.log('rolling back to: ', snapshots[0]);
           fillBoard(snapshots[0]);
         }
