@@ -64,7 +64,19 @@
     3, 0, 0, 9, 0, 2, 0, 0, 5
   ];
 
-  var solved = [
+  var board2 = [
+    0, 0, 7, 0, 0, 0, 9, 0, 0,
+    0, 0, 0, 8, 0, 4, 0, 0, 0,
+    6, 0, 0, 7, 1, 3, 0, 0, 2,
+    0, 1, 3, 6, 0, 5, 2, 9, 0,
+    0, 0, 6, 0, 0, 0, 3, 0, 0,
+    0, 4, 8, 2, 0, 7, 6, 5, 0,
+    8, 0, 0, 4, 2, 1, 0, 0, 3,
+    0, 0, 0, 9, 0, 8, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 8, 0, 0
+  ];
+
+  /*var solved = [
     8, 3, 5, 4, 1, 6, 9, 2, 7,
     2, 9, 6, 8, 5, 7, 4, 3, 1,
     4, 1, 7, 2, 9, 3, 6, 5, 8,
@@ -74,7 +86,7 @@
     6, 5, 2, 7, 8, 1, 3, 9, 4,
     9, 8, 1, 3, 4, 5, 2, 7, 6,
     3, 7, 4, 9, 6, 2, 8, 1, 5
-  ];
+  ];*/
 
   function solveSodoku(board) {
     var rows = [];
@@ -141,10 +153,23 @@
       return plays;
     };
 
-    // used to see if we've solved
+    // old func used to see if we've solved with given answer
     var compareArrays = function (a, b) {
       return a.every(function (item, idx) {
         return item === b[idx];
+      });
+    };
+
+    // check to see if we've solved without answer
+    var check4Solved = function(board) {
+      var rows = tmpBoard.toRows();
+      var cols = rows.toColumns();
+      var quads = getQuads(rows);
+
+      return [1,2,3,4,5,6,7,8,9].every(function(x) {
+        return rows.every(function(r) { return r.indexOf(x) > -1; }) &&
+          cols.every(function(c) { return c.indexOf(x) > -1; }) &&
+          quads.every(function(q) { return q.indexOf(x) > -1; });
       });
     };
 
@@ -220,7 +245,8 @@
         } else {
           // wtf? no more nextEasiestCells? not sure how this happens.
           // last ditch check to see if we actually solved
-          if (compareArrays(tmpBoard, solved)) {
+          if(check4Solved(tmpBoard)) {
+          //if (compareArrays(tmpBoard, solved)) {
             return;
           }
           // how do we determine where we went wrong? how far back do I rollback to?
@@ -229,8 +255,8 @@
           fillBoard(snapshots[0]);
         }
       }
-
-      if (compareArrays(tmpBoard, solved)) {
+      if(check4Solved(tmpBoard)) {
+      //if (compareArrays(tmpBoard, solved)) {
         displayBoard(tmpBoard, '#socket');
         document.querySelector('#hurray').style.display = 'block';
         return 'Hurray!';
@@ -249,10 +275,10 @@
     // display our boards
     displayBoard(tmpBoard, '#original');
     displayBoard(tmpBoard, '#socket');
-    displayBoard(solved, '#answer');
+    //displayBoard(solved, '#answer');
     // kick it off.
     return fillBoard(tmpBoard);
   } // end solveSodoku
 
-  console.log(solveSodoku(board));
+  console.log(solveSodoku(board2));
 }());
