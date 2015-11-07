@@ -1,8 +1,7 @@
 # sodoku-challenge
 Job interview question I'm obsessed with ATM
 
-Sometimes it will solve in 20 passes, sometimes fails after 1000.
-I am still missing something.
+Have seen it will solve in as few as passes.
 
 Need more boards to test with.
 
