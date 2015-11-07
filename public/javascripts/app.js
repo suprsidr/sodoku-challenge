@@ -12,7 +12,7 @@
   };
   Array.prototype.diff = function() {
     var context = this;
-    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
       return context.indexOf(item) === -1;
     });
   };
@@ -64,7 +64,19 @@
     3, 0, 0, 9, 0, 2, 0, 0, 5
   ];
 
-  var solved = [
+  var board2 = [
+    0, 0, 7, 0, 0, 0, 9, 0, 0,
+    0, 0, 0, 8, 0, 4, 0, 0, 0,
+    6, 0, 0, 7, 1, 3, 0, 0, 2,
+    0, 1, 3, 6, 0, 5, 2, 9, 0,
+    0, 0, 6, 0, 0, 0, 3, 0, 0,
+    0, 4, 8, 2, 0, 7, 6, 5, 0,
+    8, 0, 0, 4, 2, 1, 0, 0, 3,
+    0, 0, 0, 9, 0, 8, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 8, 0, 0
+  ];
+
+  /*var solved = [
     8, 3, 5, 4, 1, 6, 9, 2, 7,
     2, 9, 6, 8, 5, 7, 4, 3, 1,
     4, 1, 7, 2, 9, 3, 6, 5, 8,
@@ -74,7 +86,7 @@
     6, 5, 2, 7, 8, 1, 3, 9, 4,
     9, 8, 1, 3, 4, 5, 2, 7, 6,
     3, 7, 4, 9, 6, 2, 8, 1, 5
-  ];
+  ];*/
 
   function solveSodoku(board) {
     var rows = [];
@@ -141,10 +153,16 @@
       return plays;
     };
 
-    // used to see if we've solved
-    var compareArrays = function (a, b) {
-      return a.every(function (item, idx) {
-        return item === b[idx];
+    // check to see if we've solved without answer
+    var check4Solved = function(board) {
+      var rows = tmpBoard.toRows();
+      var cols = rows.toColumns();
+      var quads = getQuads(rows);
+
+      return [1,2,3,4,5,6,7,8,9].every(function(x) {
+        return rows.every(function(r) { return r.indexOf(x) > -1; }) &&
+          cols.every(function(c) { return c.indexOf(x) > -1; }) &&
+          quads.every(function(q) { return q.indexOf(x) > -1; });
       });
     };
 
@@ -194,15 +212,17 @@
         // calculate the quad with the most filled in, and start there
         var nextEasiest = [];
         quads.forEach(function (quad, i) {
-          nextEasiest.push({idx: i, val: getQuadContent(quadMap[i][0]).diff()});
+          nextEasiest.push({idx: i, val: quad.diff()});
         });
-        nextEasiest.sort(function (a, b) {
-          return a.val.length - b.val.length;
-        }).filter(function (a) {
-          return a.val.length > 0;
-        });
+        nextEasiest = nextEasiest
+          .sort(function (a, b) {
+            return a.val.length - b.val.length;
+          })
+          .filter(function (a) {
+            return a.val.length > 0;
+          });
+        console.log('nextEasiest: ' + nextEasiest[0].idx, nextEasiest[0].val);
         var nextEasiestQuad = nextEasiest[0].idx;
-
         var nextEasiestCells = quadMap[nextEasiestQuad].map(function (item) {
           var parts = item.split(':');
           return {idx: parseInt(parts[0]) * 9 + parseInt(parts[1]), plays: getCellPlays(parts[0], parts[1])};
@@ -211,26 +231,22 @@
         }).filter(function (a) {
           return a.plays.length > 0;
         });
-        //console.log(nextEasiestCells);
         if (nextEasiestCells.length > 0) {
           var next = nextEasiestCells[0].idx;
           var rndIdx = Math.floor(Math.random() * plays[next].length);
           console.log('rndIdx: ' + rndIdx);
           tmpBoard[next] = plays[next][rndIdx];
         } else {
-          // wtf? no more nextEasiestCells? not sure how this happens.
-          // last ditch check to see if we actually solved
-          if (compareArrays(tmpBoard, solved)) {
+          if(check4Solved(tmpBoard)) {
             return;
           }
           // how do we determine where we went wrong? how far back do I rollback to?
-          // total reset. Need to refactor
+          // we'll do total reset for now. Need to refactor
           console.log('rolling back to: ', snapshots[0]);
           fillBoard(snapshots[0]);
         }
       }
-
-      if (compareArrays(tmpBoard, solved)) {
+      if(check4Solved(tmpBoard)) {
         displayBoard(tmpBoard, '#socket');
         document.querySelector('#hurray').style.display = 'block';
         return 'Hurray!';
@@ -249,10 +265,10 @@
     // display our boards
     displayBoard(tmpBoard, '#original');
     displayBoard(tmpBoard, '#socket');
-    displayBoard(solved, '#answer');
+    //displayBoard(solved, '#answer');
     // kick it off.
     return fillBoard(tmpBoard);
   } // end solveSodoku
 
-  console.log(solveSodoku(board));
+  console.log(solveSodoku(board2));
 }());
