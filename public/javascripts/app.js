@@ -279,5 +279,22 @@
     return fillBoard(tmpBoard);
   } // end solveSodoku
 
+  var input = document.querySelector('input');
+  var button = document.querySelector('button');
+  button.addEventListener('click', function(e) {
+    e.preventDefault();
+    var arr = input.value.split('');
+    console.log(arr, arr.length);
+    if(arr.length === 81 && arr.every(function(i) { return [0,1,2,3,4,5,6,7,8,9].indexOf(parseInt(i)) > -1; })) {
+      displayBoard(arr, '#original');
+      setTimeout(function() {
+        console.log(solveSodoku(arr));
+      }, 1000);
+    } else {
+      alert('Sorry your array does not qualify. It is either not 81 chars long, or contains illegal characters.');
+    }
+
+  }, false);
+
   console.log(solveSodoku(board2));
 }());
