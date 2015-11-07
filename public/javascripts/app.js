@@ -95,6 +95,7 @@
     var quadMap = [];
     var tmpBoard = board.slice();
     var numTries = 0;
+    var rollbackCount = 0;
     var snapshots = [board.slice()];
 
     var getQuads = function (rows) {
@@ -154,8 +155,8 @@
     };
 
     // check to see if we've solved without answer
-    var check4Solved = function(board) {
-      var rows = tmpBoard.toRows();
+    var checkSolved = function(board) {
+      var rows = board.toRows();
       var cols = rows.toColumns();
       var quads = getQuads(rows);
 
@@ -237,16 +238,24 @@
           console.log('rndIdx: ' + rndIdx);
           tmpBoard[next] = plays[next][rndIdx];
         } else {
-          if(check4Solved(tmpBoard)) {
+          if(checkSolved(tmpBoard)) {
             return;
           }
           // how do we determine where we went wrong? how far back do I rollback to?
-          // we'll do total reset for now. Need to refactor
-          console.log('rolling back to: ', snapshots[0]);
-          fillBoard(snapshots[0]);
+          if(rollbackCount > 10) {
+            // full reset
+            console.log('full reset: ', snapshots[0]);
+            rollbackCount = 0;
+            fillBoard(snapshots[0]);
+          } else {
+            // we'll rollback to previous
+            console.log('rolling back to: ', snapshots[snapshots.length - 2]);
+            rollbackCount++;
+            fillBoard(snapshots[snapshots.length - 2]);
+          }
         }
       }
-      if(check4Solved(tmpBoard)) {
+      if(checkSolved(tmpBoard)) {
         displayBoard(tmpBoard, '#socket');
         document.querySelector('#hurray').style.display = 'block';
         return 'Hurray!';
