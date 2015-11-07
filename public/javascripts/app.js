@@ -12,7 +12,7 @@
   };
   Array.prototype.diff = function() {
     var context = this;
-    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
       return context.indexOf(item) === -1;
     });
   };
@@ -153,13 +153,6 @@
       return plays;
     };
 
-    // old func used to see if we've solved with given answer
-    var compareArrays = function (a, b) {
-      return a.every(function (item, idx) {
-        return item === b[idx];
-      });
-    };
-
     // check to see if we've solved without answer
     var check4Solved = function(board) {
       var rows = tmpBoard.toRows();
@@ -219,15 +212,17 @@
         // calculate the quad with the most filled in, and start there
         var nextEasiest = [];
         quads.forEach(function (quad, i) {
-          nextEasiest.push({idx: i, val: getQuadContent(quadMap[i][0]).diff()});
+          nextEasiest.push({idx: i, val: quad.diff()});
         });
-        nextEasiest.sort(function (a, b) {
-          return a.val.length - b.val.length;
-        }).filter(function (a) {
-          return a.val.length > 0;
-        });
+        nextEasiest = nextEasiest
+          .sort(function (a, b) {
+            return a.val.length - b.val.length;
+          })
+          .filter(function (a) {
+            return a.val.length > 0;
+          });
+        console.log('nextEasiest: ' + nextEasiest[0].idx, nextEasiest[0].val);
         var nextEasiestQuad = nextEasiest[0].idx;
-
         var nextEasiestCells = quadMap[nextEasiestQuad].map(function (item) {
           var parts = item.split(':');
           return {idx: parseInt(parts[0]) * 9 + parseInt(parts[1]), plays: getCellPlays(parts[0], parts[1])};
@@ -236,27 +231,22 @@
         }).filter(function (a) {
           return a.plays.length > 0;
         });
-        //console.log(nextEasiestCells);
         if (nextEasiestCells.length > 0) {
           var next = nextEasiestCells[0].idx;
           var rndIdx = Math.floor(Math.random() * plays[next].length);
           console.log('rndIdx: ' + rndIdx);
           tmpBoard[next] = plays[next][rndIdx];
         } else {
-          // wtf? no more nextEasiestCells? not sure how this happens.
-          // last ditch check to see if we actually solved
           if(check4Solved(tmpBoard)) {
-          //if (compareArrays(tmpBoard, solved)) {
             return;
           }
           // how do we determine where we went wrong? how far back do I rollback to?
-          // total reset. Need to refactor
+          // we'll do total reset for now. Need to refactor
           console.log('rolling back to: ', snapshots[0]);
           fillBoard(snapshots[0]);
         }
       }
       if(check4Solved(tmpBoard)) {
-      //if (compareArrays(tmpBoard, solved)) {
         displayBoard(tmpBoard, '#socket');
         document.querySelector('#hurray').style.display = 'block';
         return 'Hurray!';
