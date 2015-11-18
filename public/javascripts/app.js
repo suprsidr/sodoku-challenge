@@ -302,7 +302,7 @@
   var button = document.querySelector('button');
   button.addEventListener('click', function(e) {
     e.preventDefault();
-    var arr = Array.from(input.value, function(i){ return parseInt(i); });
+    var arr = Array.from(input.value, (i) => parseInt(i));
     console.log(arr, arr.length);
     if(arr.length === 81 && arr.every(function(i) { return [0,1,2,3,4,5,6,7,8,9].indexOf(i) > -1; })) {
       setTimeout(function() {
