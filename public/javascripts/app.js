@@ -310,7 +310,7 @@
       }, 0);
       console.log(solveSodoku(arr));
     } else {
-      alert('Sorry your array does not qualify.\n It is either not 81 chars long, or contains illegal characters.');
+      alert('Sorry your array does not qualify.\n It\'s either not 81 chars long, or contains illegal characters.');
     }
 
   }, false);
