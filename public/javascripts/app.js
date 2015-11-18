@@ -52,6 +52,8 @@
     return cols;
   };
 
+  var str = '900000070005020800060003004000050020080009100007000006000600000001070050040008003';
+
   var board = [
     8, 0, 0, 4, 0, 6, 0, 0, 7,
     0, 0, 0, 0, 0, 0, 4, 0, 0,
@@ -87,6 +89,23 @@
     9, 8, 1, 3, 4, 5, 2, 7, 6,
     3, 7, 4, 9, 6, 2, 8, 1, 5
   ];*/
+
+  // simply for display on the page
+  function displayBoard(board, el) {
+    var rows = board.toRows();
+    var socket = document.querySelector(el);
+    socket.innerHTML = '';
+    rows.forEach(function (row, r) {
+      var p = document.createElement('p');
+      row.forEach(function (item, c) {
+        var span = document.createElement('span');
+        span.classList.add('r'+r+'c'+c); // can we update individual cells and add animation?
+        span.textContent = item;
+        p.appendChild(span);
+      });
+      socket.appendChild(p);
+    });
+  };
 
   function solveSodoku(board) {
     var rows = [];
@@ -167,25 +186,11 @@
       });
     };
 
-    // simply for display on the page
-    var displayBoard = function (board, el) {
-      var rows = board.toRows();
-      var socket = document.querySelector(el);
-      socket.innerHTML = '';
-      rows.forEach(function (row) {
-        var p = document.createElement('p');
-        row.forEach(function (item) {
-          var span = document.createElement('span');
-          span.textContent = item;
-          p.appendChild(span);
-        });
-        socket.appendChild(p);
-      });
-    };
-
     var fillBoard = function (board) {
       numTries++;
-      displayBoard(board, '#socket');
+      setTimeout(function() {
+        displayBoard(board, '#socket');
+      }, 0);
       document.querySelector('h2#attempts').textContent = 'No. of Passes to Solve: ' + numTries;
       tmpBoard = board.slice();
       rows = tmpBoard.toRows();
@@ -222,7 +227,7 @@
           .filter(function (a) {
             return a.val.length > 0;
           });
-        console.log('nextEasiest: ' + nextEasiest[0].idx, nextEasiest[0].val);
+        console.log('nextEasiestQuad: ' + nextEasiest[0].idx, nextEasiest[0].val);
         var nextEasiestQuad = nextEasiest[0].idx;
         var nextEasiestCells = quadMap[nextEasiestQuad].map(function (item) {
           var parts = item.split(':');
@@ -234,15 +239,17 @@
         });
         if (nextEasiestCells.length > 0) {
           var next = nextEasiestCells[0].idx;
+          console.log('nextEasiestCell: ' + next, plays[next]);
           var rndIdx = Math.floor(Math.random() * plays[next].length);
-          console.log('rndIdx: ' + rndIdx);
+          console.log('using rndIdx: ' + rndIdx + ' replacing: ' + tmpBoard[next] + ' with: ' + plays[next][rndIdx]);
           tmpBoard[next] = plays[next][rndIdx];
+          //if(numTries > 2) return;
         } else {
           if(checkSolved(tmpBoard)) {
             return;
           }
           // how do we determine where we went wrong? how far back do I rollback to?
-          if(rollbackCount > 10) {
+          if(rollbackCount > 30) {
             // full reset
             console.log('full reset: ', snapshots[0]);
             rollbackCount = 0;
@@ -256,16 +263,24 @@
         }
       }
       if(checkSolved(tmpBoard)) {
-        displayBoard(tmpBoard, '#socket');
+        setTimeout(function() {
+          displayBoard(tmpBoard, '#socket');
+        }, 0);
+
         document.querySelector('#hurray').style.display = 'block';
         return 'Hurray!';
       } else {
         document.querySelector('#hurray').style.display = 'none';
         document.querySelector('#boo-hiss').style.display = 'none';
-        displayBoard(tmpBoard, '#socket');
-        if (numTries >= 1000) {
+        setTimeout(function() {
+          displayBoard(tmpBoard, '#socket');
+        }, 0);
+        if (numTries >= 2000) {
+          setTimeout(function() {
+            displayBoard(tmpBoard, '#socket');
+          }, 0);
           document.querySelector('#boo-hiss').style.display = 'block';
-          return 'Sorry, too many tries!';
+          return 'Sorry, too many passes!';
         }
         return fillBoard(tmpBoard);
       }
@@ -273,7 +288,9 @@
 
     // display our boards
     displayBoard(tmpBoard, '#original');
-    displayBoard(tmpBoard, '#socket');
+    setTimeout(function() {
+      displayBoard(tmpBoard, '#socket');
+    }, 0);
     //displayBoard(solved, '#answer');
     // kick it off.
     return fillBoard(tmpBoard);
@@ -283,15 +300,15 @@
   var button = document.querySelector('button');
   button.addEventListener('click', function(e) {
     e.preventDefault();
-    var arr = input.value.split('');
+    var arr = Array.from(input.value, (i) => parseInt(i));
     console.log(arr, arr.length);
-    if(arr.length === 81 && arr.every(function(i) { return [0,1,2,3,4,5,6,7,8,9].indexOf(parseInt(i)) > -1; })) {
-      displayBoard(arr, '#original');
+    if(arr.length === 81 && arr.every(function(i) { return [0,1,2,3,4,5,6,7,8,9].indexOf(i) > -1; })) {
       setTimeout(function() {
-        console.log(solveSodoku(arr));
-      }, 1000);
+        displayBoard(arr, '#original');
+      }, 0);
+      console.log(solveSodoku(arr));
     } else {
-      alert('Sorry your array does not qualify. It is either not 81 chars long, or contains illegal characters.');
+      alert('Sorry your array does not qualify.\n It is either not 81 chars long, or contains illegal characters.');
     }
 
   }, false);
