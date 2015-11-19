@@ -179,18 +179,16 @@
       var cols = rows.toColumns();
       var quads = getQuads(rows);
 
-      return [1,2,3,4,5,6,7,8,9].every(function(x) {
-        return rows.every(function(r) { return r.indexOf(x) > -1; }) &&
-          cols.every(function(c) { return c.indexOf(x) > -1; }) &&
-          quads.every(function(q) { return q.indexOf(x) > -1; });
+      return [1,2,3,4,5,6,7,8,9].every((x) => {
+        return rows.every((r) => r.indexOf(x) > -1) &&
+          cols.every((c) => c.indexOf(x) > -1) &&
+          quads.every((q) => q.indexOf(x) > -1);
       });
     };
 
     var fillBoard = function (board) {
       numTries++;
-      setTimeout(function() {
-        displayBoard(board, '#socket');
-      }, 0);
+      displayBoard(board, '#socket');
       document.querySelector('h2#attempts').textContent = 'No. of Passes to Solve: ' + numTries;
       tmpBoard = board.slice();
       rows = tmpBoard.toRows();
@@ -202,7 +200,7 @@
       var replacements = 0;
 
       // Get all the easy ones first
-      plays.forEach(function (play, i) {
+      plays.forEach((play, i) => {
         if (play.length === 1 && tmpBoard[i] === 0) {
           console.log('replacing: ' + tmpBoard[i] + ' with: ' + play[0]);
           replacements++;
@@ -217,26 +215,22 @@
         // get our next easiest
         // calculate the quad with the most filled in, and start there
         var nextEasiest = [];
-        quads.forEach(function (quad, i) {
-          nextEasiest.push({idx: i, val: quad.diff()});
-        });
+        quads.forEach((quad, i) => nextEasiest.push({idx: i, val: quad.diff()}));
         nextEasiest = nextEasiest
-          .sort(function (a, b) {
-            return a.val.length - b.val.length;
-          })
-          .filter(function (a) {
-            return a.val.length > 0;
-          });
+          .sort((a, b) => a.val.length - b.val.length)
+          .filter((a) => a.val.length > 0);
         console.log('nextEasiestQuad: ' + nextEasiest[0].idx, nextEasiest[0].val);
         var nextEasiestQuad = nextEasiest[0].idx;
-        var nextEasiestCells = quadMap[nextEasiestQuad].map(function (item) {
+        var nextEasiestCells = quadMap[nextEasiestQuad].map((item) => {
           var parts = item.split(':');
-          return {idx: parseInt(parts[0]) * 9 + parseInt(parts[1]), plays: getCellPlays(parts[0], parts[1])};
-        }).sort(function (a, b) {
-          return a.plays.length - b.plays.length;
-        }).filter(function (a) {
-          return a.plays.length > 0;
-        });
+          return {
+            idx: parseInt(parts[0]) * 9 + parseInt(parts[1]),
+            plays: getCellPlays(parts[0], parts[1])
+          };
+        })
+          .sort((a, b) => a.plays.length - b.plays.length)
+          .filter((a) => a.plays.length > 0);
+
         if (nextEasiestCells.length > 0) {
           var next = nextEasiestCells[0].idx;
           console.log('nextEasiestCell: ' + next, plays[next]);
@@ -263,22 +257,15 @@
         }
       }
       if(checkSolved(tmpBoard)) {
-        setTimeout(function() {
-          displayBoard(tmpBoard, '#socket');
-        }, 0);
-
+        displayBoard(tmpBoard, '#socket');
         document.querySelector('#hurray').style.display = 'block';
         return 'Hurray!';
       } else {
         document.querySelector('#hurray').style.display = 'none';
         document.querySelector('#boo-hiss').style.display = 'none';
-        setTimeout(function() {
-          displayBoard(tmpBoard, '#socket');
-        }, 0);
+        displayBoard(tmpBoard, '#socket');
         if (numTries >= 2000) {
-          setTimeout(function() {
-            displayBoard(tmpBoard, '#socket');
-          }, 0);
+          displayBoard(tmpBoard, '#socket');
           document.querySelector('#boo-hiss').style.display = 'block';
           return 'Sorry, too many passes!';
         }
@@ -288,12 +275,9 @@
 
     // display our boards
     displayBoard(tmpBoard, '#original');
-    setTimeout(function() {
-      displayBoard(tmpBoard, '#socket');
-    }, 0);
-    //displayBoard(solved, '#answer');
-    // kick it off.
-    return fillBoard(tmpBoard);
+    displayBoard(tmpBoard, '#socket');
+    setTimeout(() => fillBoard(tmpBoard), 0);
+
   } // end solveSodoku
 
   var input = document.querySelector('input');
@@ -302,16 +286,15 @@
     e.preventDefault();
     var arr = Array.from(input.value, (i) => parseInt(i));
     console.log(arr, arr.length);
-    if(arr.length === 81 && arr.every(function(i) { return [0,1,2,3,4,5,6,7,8,9].indexOf(i) > -1; })) {
-      setTimeout(function() {
-        displayBoard(arr, '#original');
-      }, 0);
-      console.log(solveSodoku(arr));
+    if(arr.length === 81 && arr.every((i) => [0,1,2,3,4,5,6,7,8,9].indexOf(i) > -1)) {
+      displayBoard(arr, '#original');
+      setTimeout(() => console.log(solveSodoku(arr)), 0);
     } else {
       alert('Sorry your array does not qualify.\n It is either not 81 chars long, or contains illegal characters.');
     }
 
   }, false);
+
 
   console.log(solveSodoku(board2));
 }());
