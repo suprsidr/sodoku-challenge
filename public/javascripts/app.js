@@ -11,9 +11,8 @@
     return results;
   };
   Array.prototype.diff = function() {
-    var context = this;
     return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter((item) =>
-      context.indexOf(item) === -1);
+      this.indexOf(item) === -1);
   };
   Array.prototype.intersect = function() {
     // convert arguments to array
