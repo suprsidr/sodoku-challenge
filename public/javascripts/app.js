@@ -3,20 +3,17 @@
  */
 (function () {
   'use strict';
-  if(!Array.from){Array.from=(function(){var toStr=Object.prototype.toString;var isCallable=function(fn){return typeof fn==='function'||toStr.call(fn)==='[object Function]'};var toInteger=function(value){var number=Number(value);if(isNaN(number)){return 0}if(number===0||!isFinite(number)){return number}return(number>0?1:-1)*Math.floor(Math.abs(number))};var maxSafeInteger=Math.pow(2,53)-1;var toLength=function(value){var len=toInteger(value);return Math.min(Math.max(len,0),maxSafeInteger)};return function from(arrayLike){var C=this;var items=Object(arrayLike);if(arrayLike==null){throw new TypeError("Array.from requires an array-like object - not null or undefined");}var mapFn=arguments.length>1?arguments[1]:void undefined;var T;if(typeof mapFn!=='undefined'){if(!isCallable(mapFn)){throw new TypeError('Array.from: when provided, the second argument must be a function');}if(arguments.length>2){T=arguments[2]}}var len=toLength(items.length);var A=isCallable(C)?Object(new C(len)):new Array(len);var k=0;var kValue;while(k<len){kValue=items[k];if(mapFn){A[k]=typeof T==='undefined'?mapFn(kValue,k):mapFn.call(T,kValue,k)}else{A[k]=kValue}k+=1}A.length=len;return A}}())}
-
-  Array.prototype.concatAll = function () {
+  Array.prototype.concatAll = function() {
     var results = [];
-    this.forEach(function (subArray) {
+    this.forEach((subArray) => {
       results.push.apply(results, subArray);
     });
     return results;
   };
   Array.prototype.diff = function() {
     var context = this;
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(function (item) {
-      return context.indexOf(item) === -1;
-    });
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter((item) =>
+      context.indexOf(item) === -1);
   };
   Array.prototype.intersect = function() {
     // convert arguments to array
@@ -25,15 +22,15 @@
       args.push(arguments[i]);
     }
     // args[0] needs to have greatest length
-    args.sort(function (a, b) {
-      return b.length - a.length;
-    });
+    args.sort((a, b) =>
+      b.length - a.length
+    );
     // get intersection
-    return args[0].filter(function (item) {
-      return args.every(function (arg) {
-        return arg.indexOf(item) > -1
-      })
-    });
+    return args[0].filter((item) =>
+      args.every((arg) =>
+        arg.indexOf(item) > -1
+      )
+    );
   };
   Array.prototype.toRows = function() {
     var idx = 0, rows = [], len = this.length;
@@ -119,7 +116,7 @@
     var rollbackCount = 0;
     var snapshots = [board.slice()];
 
-    var getQuads = function (rows) {
+    var getQuads = (rows) => {
       if (rows.length === 0) {
         rows = tmpBoard.toRows();
       }
@@ -147,7 +144,7 @@
       if (quads.length === 0) {
         quads = getQuads();
       }
-      quadMap.forEach(function (quad, i) {
+      quadMap.forEach((quad, i) => {
         if (quad.indexOf(idxs) > -1) {
           result = quads[i];
         }
